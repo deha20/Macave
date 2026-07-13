@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - MaCave</title>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'products/css/style.css' %}">
+</head>
+<body class="login-body">
+
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="logo-icon">
+                <i data-lucide="wine"></i>
+            </div>
+        </div>
+        
+        <div class="login-header">
+            <h2>Bienvenue sur MaCave</h2>
+            <p>Connectez-vous pour gérer votre stock de cave</p>
+        </div>
+
+        {% if form.errors %}
+        <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 24px; font-size: 0.825rem; color: #fca5a5; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="alert-circle" style="flex-shrink: 0; width: 18px; height: 18px;"></i>
+            <span>Identifiant ou mot de passe incorrect.</span>
+        </div>
+        {% endif %}
+
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            
+            <div class="form-group">
+                <label for="id_username" class="form-label">Identifiant</label>
+                <input type="text" name="username" autofocus required id="id_username" class="form-control" placeholder="Entrez votre identifiant">
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password" class="form-label">Mot de passe</label>
+                <input type="password" name="password" required id="id_password" class="form-control" placeholder="Entrez votre mot de passe">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-submit">
+                <span>Se connecter</span>
+                <i data-lucide="log-in" style="width: 16px; height: 16px;"></i>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titre %}MaCave - Gestion de Cave{% endblock %}</title>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'products/css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if request.user.is_authenticated and request.user.profile.theme == 'dark' %}dark-mode{% endif %}">
+
+    <!-- Page Loader transition -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <p>Chargement en cours...</p>
+        </div>
+    </div>
+
+    <!-- Django Messages Container (Toasts) -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-toast {{ message.tags }}">
+            <div class="alert-toast-icon">
+                {% if message.tags == 'success' %}
+                    <i data-lucide="check-circle-2"></i>
+                {% elif message.tags == 'error' %}
+                    <i data-lucide="alert-octagon"></i>
+                {% elif message.tags == 'warning' %}
+                    <i data-lucide="alert-triangle"></i>
+                {% else %}
+                    <i data-lucide="info"></i>
+                {% endif %}
+            </div>
+            <div class="alert-toast-content">
+                <div class="alert-toast-title">
+                    {% if message.tags == 'success' %}
+                        Succès
+                    {% elif message.tags == 'error' %}
+                        Erreur
+                    {% elif message.tags == 'warning' %}
+                        Attention
+                    {% else %}
+                        Information
+                    {% endif %}
+                </div>
+                <div class="alert-toast-message">{{ message.message }}</div>
+            </div>
+            <button class="alert-toast-close">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-icon">
+                    <i data-lucide="wine"></i>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-name">MaCave</span>
+                    <span class="brand-sub">Gestion de Cave</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu-container">
+                <nav class="sidebar-menu">
+                    <span class="menu-section-title">Navigation</span>
+                    
+                    <a href="{% url 'dashboard' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <span class="menu-item-left">
+                            <i data-lucide="layout-dashboard"></i>
+                            <span>Tableau de bord</span>
+                        </span>
+                    </a>
+
+                    <a href="{% url 'produit_list' %}" class="menu-item {% if 'produit' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="menu-item-left">
+                            <i data-lucide="box"></i>
+                            <span>Produits</span>
+                        </span>
+                        <i data-lucide="chevron-right" class="arrow-icon"></i>
+                    </a>
+
+                    <a href="{% url 'categorie_list' %}" class="menu-item {% if 'categorie' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="menu-item-left">
+                            <i data-lucide="tag"></i>
+                            <span>Catégories</span>
+                        </span>
+                        <i data-lucide="chevron-right" class="arrow-icon"></i>
+                    </a>
+
+                    <a href="{% url 'fournisseur_list' %}" class="menu-item {% if 'fournisseur' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="menu-item-left">
+                            <i data-lucide="users"></i>
+                            <span>Fournisseurs</span>
+                        </span>
+                        <i data-lucide="chevron-right" class="arrow-icon"></i>
+                    </a>
+
+                    <span class="menu-section-title">Opérations</span>
+                    
+                    <a href="{% url 'mouvement_list' %}" class="menu-item {% if request.resolver_match.url_name == 'mouvement_list' %}active{% endif %}">
+                        <span class="menu-item-left">
+                            <i data-lucide="arrow-left-right"></i>
+                            <span>Mouvements</span>
+                        </span>
+                    </a>
+
+                    <span class="menu-section-title">Système</span>
+                    
+                    <a href="{% url 'settings' %}" class="menu-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                        <span class="menu-item-left">
+                            <i data-lucide="settings"></i>
+                            <span>Paramètres</span>
+                        </span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="sidebar-profile">
+                <a href="{% url 'settings' %}?tab=profile" class="profile-details" style="cursor: pointer; text-decoration: none;">
+                    <div class="profile-avatar">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </div>
+                    <div class="profile-text">
+                        <span class="profile-name">{{ request.user.username|capfirst }}</span>
+                        <span class="profile-role">
+                            {% if request.user.is_superuser %}
+                                Administrateur
+                            {% else %}
+                                Utilisateur
+                            {% endif %}
+                        </span>
+                    </div>
+                </a>
+                <form action="{% url 'logout' %}" method="post" style="margin: 0; display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn" title="Se déconnecter">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Topbar (Header) -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <form action="{% url 'produit_list' %}" method="get" class="search-box">
+                        <i data-lucide="search"></i>
+                        <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher un produit, fournisseur...">
+                        <span class="search-kbd">Ctrl + K</span>
+                    </form>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="icon-actions">
+                        <button class="action-icon-btn" title="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="badge-dot">3</span>
+                        </button>
+                    </div>
+                    
+                    <div class="user-dropdown">
+                        <button class="user-profile-btn">
+                            <div class="avatar">
+                                {{ request.user.username|slice:":1"|upper }}
+                            </div>
+                            <span class="username">{{ request.user.username }}</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown-menu">
+                            <a href="{% url 'settings' %}?tab=profile" class="dropdown-item">
+                                <i data-lucide="user"></i>
+                                <span>Mon Profil</span>
+                            </a>
+                            <a href="{% url 'settings' %}?tab=preferences" class="dropdown-item">
+                                <i data-lucide="sliders"></i>
+                                <span>Préférences</span>
+                            </a>
+                            <hr>
+                            <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item logout-item">
+                                    <i data-lucide="log-out"></i>
+                                    <span>Se déconnecter</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Container -->
+            <div class="content-body">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'products/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

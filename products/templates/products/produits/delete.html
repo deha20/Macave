@@ -1,0 +1,52 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}Supprimer le produit {{ produit.nom }} - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>Supprimer le produit</h1>
+        <p>Confirmation de suppression de l'inventaire.</p>
+    </div>
+    <div>
+        <a href="{% url 'produit_list' %}" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            <span>Retour</span>
+        </a>
+    </div>
+</div>
+
+<div class="card form-container" style="max-width: 500px; border-color: rgba(239, 68, 68, 0.2);">
+    <div class="card-header" style="background-color: rgba(239, 68, 68, 0.02); border-bottom-color: rgba(239, 68, 68, 0.1);">
+        <span class="card-title" style="color: #ef4444;">
+            <i data-lucide="alert-triangle"></i>
+            <span>Action irréversible</span>
+        </span>
+    </div>
+    <div class="card-body" style="text-align: center; padding: 32px 24px;">
+        <div style="width: 56px; height: 56px; border-radius: var(--radius-full); background-color: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <i data-lucide="trash-2" style="width: 28px; height: 28px;"></i>
+        </div>
+        
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">
+            Supprimer "{{ produit.nom }}" ?
+        </h3>
+        
+        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 24px; line-height: 1.6;">
+            Êtes-vous sûr de vouloir retirer le produit "{{ produit.nom }}" de l'inventaire ? Il ne sera plus visible dans la liste des produits actifs, mais l'historique complet de ses mouvements sera précieusement conservé dans le système.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: center; gap: 12px;">
+                <a href="{% url 'produit_detail' produit.pk %}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-danger">
+                    <i data-lucide="trash-2"></i>
+                    <span>Confirmer la suppression</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

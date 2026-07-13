@@ -1,0 +1,124 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}Liste des Produits - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>Produits</h1>
+        <p>Gérez l'inventaire des bouteilles et boissons de votre cave.</p>
+    </div>
+    <div>
+        <a href="{% url 'produit_create' %}" class="btn btn-primary">
+            <i data-lucide="plus"></i>
+            <span>Ajouter un produit</span>
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <i data-lucide="box"></i>
+            <span>Tous les produits ({{ produits|length }})</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        {% if has_active_filter %}
+        <div style="background-color: var(--primary-light); color: var(--primary); padding: 12px 24px; font-size: 0.875rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="filter" style="width: 16px; height: 16px;"></i>
+                <span>
+                    {% if active_filters.q %}
+                        Résultats pour la recherche : "{{ active_filters.q }}"
+                    {% elif active_filters.alerte %}
+                        Filtré par : Produits en alerte de stock
+                    {% elif active_filters.stock_faible %}
+                        Filtré par : Produits en stock faible
+                    {% elif active_filters.rupture %}
+                        Filtré par : Produits en rupture de stock
+                    {% endif %}
+                </span>
+            </div>
+            <a href="{% url 'produit_list' %}" style="display: flex; align-items: center; gap: 6px; color: var(--primary); text-decoration: underline;">
+                <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                <span>Réinitialiser les filtres</span>
+            </a>
+        </div>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th>Référence / Produit</th>
+                        <th>Catégorie</th>
+                        <th>Fournisseur</th>
+                        <th>Prix Achat</th>
+                        <th>Prix Vente</th>
+                        <th>Stock Actuel</th>
+                        <th>Seuil</th>
+                        <th>Statut</th>
+                        <th style="text-align: right; padding-right: 24px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for produit in produits %}
+                    <tr>
+                        <td>
+                            <div class="product-cell">
+                                {% if produit.image %}
+                                    <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="product-img">
+                                {% else %}
+                                    <div class="product-img" style="display: flex; align-items: center; justify-content: center; background-color: var(--primary-light); color: var(--primary);">
+                                        <i data-lucide="wine" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="product-info-text">
+                                    <a href="{% url 'produit_detail' produit.pk %}" class="product-name">{{ produit.nom }}</a>
+                                    <span class="product-ref">{{ produit.reference }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ produit.categorie.nom }}</td>
+                        <td>{{ produit.fournisseur.nom }}</td>
+                        <td><strong>{{ produit.prix_achat }} FCFA</strong></td>
+                        <td><strong>{{ produit.prix_vente }} FCFA</strong></td>
+                        <td><strong>{{ produit.stock_actuel }}</strong></td>
+                        <td>{{ produit.seuil_alerte }}</td>
+                        <td>
+                            {% if produit.en_rupture %}
+                                <span class="badge danger">Rupture</span>
+                            {% elif produit.stock_faible %}
+                                <span class="badge warning">Faible</span>
+                            {% else %}
+                                <span class="badge normal">Normal</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right; padding-right: 24px;">
+                            <div style="display: inline-flex; gap: 8px;">
+                                <a href="{% url 'produit_detail' produit.pk %}" class="btn btn-secondary btn-sm" title="Détails">
+                                    <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                                </a>
+                                <a href="{% url 'produit_update' produit.pk %}" class="btn btn-secondary btn-sm" style="color: var(--primary);" title="Modifier">
+                                    <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                                </a>
+                                <a href="{% url 'produit_delete' produit.pk %}" class="btn btn-secondary btn-sm" style="color: #ef4444;" title="Supprimer">
+                                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                            Aucun produit n'a été trouvé dans l'inventaire. Cliquez sur "Ajouter un produit" pour commencer.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

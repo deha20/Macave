@@ -1,0 +1,125 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}{{ titre }} - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>{{ titre }}</h1>
+        <p>
+            {% if type_mouvement == 'ENTREE' %}
+                Enregistrez un arrivage de marchandise (augmentation du stock).
+            {% elif type_mouvement == 'SORTIE' %}
+                Enregistrez un retrait ou une vente de bouteille (diminution du stock).
+            {% else %}
+                Ajustez le niveau réel de stock après inventaire physique.
+            {% endif %}
+        </p>
+    </div>
+    <div>
+        <a href="{% url 'mouvement_list' %}" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            <span>Retour</span>
+        </a>
+    </div>
+</div>
+
+<div class="card form-container">
+    <div class="card-header" style="
+        {% if type_mouvement == 'ENTREE' %}
+            background-color: rgba(21, 128, 61, 0.02); border-bottom-color: rgba(21, 128, 61, 0.1);
+        {% elif type_mouvement == 'SORTIE' %}
+            background-color: rgba(239, 68, 68, 0.02); border-bottom-color: rgba(239, 68, 68, 0.1);
+        {% else %}
+            background-color: rgba(107, 33, 168, 0.02); border-bottom-color: rgba(107, 33, 168, 0.1);
+        {% endif %}
+    ">
+        <span class="card-title" style="
+            {% if type_mouvement == 'ENTREE' %}
+                color: var(--status-normal-text);
+            {% elif type_mouvement == 'SORTIE' %}
+                color: var(--status-danger-text);
+            {% else %}
+                color: var(--status-info-text);
+            {% endif %}
+        ">
+            {% if type_mouvement == 'ENTREE' %}
+                <i data-lucide="arrow-down-left"></i>
+            {% elif type_mouvement == 'SORTIE' %}
+                <i data-lucide="arrow-up-right"></i>
+            {% else %}
+                <i data-lucide="sliders"></i>
+            {% endif %}
+            <span>Opération : {{ titre }}</span>
+        </span>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; color: #ef4444; font-size: 0.875rem;">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-grid">
+                <!-- Produit -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.produit.id_for_label }}">Sélectionner le produit *</label>
+                    {{ form.produit }}
+                    {% if form.produit.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.produit.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Quantite -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.quantite.id_for_label }}">
+                        Quantité à impacter *
+                    </label>
+                    {{ form.quantite }}
+                    <span class="form-help">
+                        {% if type_mouvement == 'AJUSTEMENT' %}
+                            Entrez une valeur positive pour rajouter au stock, ou négative pour le diminuer.
+                        {% else %}
+                            La quantité doit être supérieure à zéro.
+                        {% endif %}
+                    </span>
+                    {% if form.quantite.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.quantite.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Motif -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.motif.id_for_label }}">Motif / Justificatif</label>
+                    {{ form.motif }}
+                    {% if form.motif.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.motif.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'mouvement_list' %}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary" style="
+                    {% if type_mouvement == 'ENTREE' %}
+                        background-color: var(--status-normal-text); box-shadow: 0 4px 10px rgba(21, 128, 61, 0.2);
+                    {% elif type_mouvement == 'SORTIE' %}
+                        background-color: var(--status-danger-text); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+                    {% else %}
+                        background-color: var(--status-info-text); box-shadow: 0 4px 10px rgba(107, 33, 168, 0.2);
+                    {% endif %}
+                ">
+                    <i data-lucide="check"></i>
+                    <span>Valider l'opération</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

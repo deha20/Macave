@@ -1,0 +1,185 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}Détails Produit : {{ produit.nom }} - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>Fiche Produit {% if produit.est_supprime %}<span class="badge danger" style="font-size: 0.9rem; margin-left: 8px;">Archivé / Supprimé</span>{% endif %}</h1>
+        <p>Consultez les informations détaillées et l'historique des stocks pour {{ produit.nom }}.</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <a href="{% url 'produit_list' %}" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            <span>Retour</span>
+        </a>
+        {% if not produit.est_supprime %}
+        <a href="{% url 'produit_update' produit.pk %}" class="btn btn-secondary" style="color: var(--primary);">
+            <i data-lucide="edit-3"></i>
+            <span>Modifier</span>
+        </a>
+        <a href="{% url 'produit_delete' produit.pk %}" class="btn btn-danger">
+            <i data-lucide="trash-2"></i>
+            <span>Supprimer</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if produit.est_supprime %}
+<div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: var(--radius-md); padding: 16px; margin-bottom: 24px; color: #ef4444; display: flex; align-items: center; gap: 12px;">
+    <i data-lucide="alert-triangle" style="width: 24px; height: 24px; flex-shrink: 0;"></i>
+    <div>
+        <h4 style="font-weight: 700; margin: 0 0 2px 0;">Ce produit a été archivé (supprimé)</h4>
+        <p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">Ce produit a été retiré de la vente le {{ produit.date_suppression|date:"d/m/Y à H:i" }}. Ses données techniques et l'historique de ses mouvements ci-dessous sont conservés à des fins statistiques.</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="detail-layout">
+    <!-- Left Column: Media & Quick Info -->
+    <div class="detail-sidebar">
+        <!-- Product Image -->
+        <div class="detail-img-card">
+            {% if produit.image %}
+                <img src="{{ produit.image.url }}" alt="{{ produit.nom }}">
+            {% else %}
+                <div class="detail-img-placeholder">
+                    <i data-lucide="wine"></i>
+                    <span style="font-size: 0.875rem;">Aucune image disponible</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Tech info list -->
+        <div class="detail-info-list">
+            <div class="info-item">
+                <span class="info-label">Référence</span>
+                <span class="info-value" style="font-family: monospace; letter-spacing: 0.5px;">{{ produit.reference }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Statut du Stock</span>
+                <span class="info-value">
+                    {% if produit.en_rupture %}
+                        <span class="badge danger">Rupture de stock</span>
+                    {% elif produit.stock_faible %}
+                        <span class="badge warning">Stock Faible</span>
+                    {% else %}
+                        <span class="badge normal">Normal</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Stock Actuel</span>
+                <span class="info-value" style="font-size: 1.25rem; color: var(--primary);">{{ produit.stock_actuel }} unités</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Seuil d'alerte</span>
+                <span class="info-value">{{ produit.seuil_alerte }} unités</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Specs & History -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Card: Spécifications Générales -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i data-lucide="file-text"></i>
+                    <span>Informations Générales</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid" style="margin-bottom: 0;">
+                    <div class="info-item">
+                        <span class="info-label">Nom du Produit</span>
+                        <span class="info-value">{{ produit.nom }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Catégorie</span>
+                        <span class="info-value">{{ produit.categorie.nom }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Fournisseur</span>
+                        <span class="info-value">{{ produit.fournisseur.nom }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cave de stockage</span>
+                        <span class="info-value">{{ produit.cave.nom }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Prix d'achat</span>
+                        <span class="info-value">{{ produit.prix_achat }} FCFA</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Prix de vente</span>
+                        <span class="info-value">{{ produit.prix_vente }} FCFA</span>
+                    </div>
+                    <div class="info-item col-span-2">
+                        <span class="info-label">Description</span>
+                        <span class="info-value" style="font-weight: normal; color: var(--text-muted);">
+                            {{ produit.description|default:"Aucune description fournie pour ce produit." }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Historique des Mouvements -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i data-lucide="history"></i>
+                    <span>Historique récent des mouvements (max 10)</span>
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Quantité</th>
+                                <th>Utilisateur</th>
+                                <th>Motif</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mouvement in mouvements %}
+                            <tr>
+                                <td>{{ mouvement.date_mouvement|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if mouvement.type_mouvement == 'ENTREE' %}
+                                        <span class="badge normal">Entrée</span>
+                                    {% elif mouvement.type_mouvement == 'SORTIE' %}
+                                        <span class="badge danger">Sortie</span>
+                                    {% else %}
+                                        <span class="badge info">Ajustement</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>
+                                        {% if mouvement.type_mouvement == 'ENTREE' %}+{% elif mouvement.type_mouvement == 'SORTIE' %}-{% endif %}{{ mouvement.quantite }}
+                                    </strong>
+                                </td>
+                                <td>{{ mouvement.utilisateur.username }}</td>
+                                <td><span style="font-size: 0.825rem; color: var(--text-muted);">{{ mouvement.motif|default:"-" }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                    Aucun mouvement enregistré pour ce produit.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

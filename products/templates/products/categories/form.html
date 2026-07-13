@@ -1,0 +1,69 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}{{ titre }} - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>{{ titre }}</h1>
+        <p>Définissez une nouvelle catégorie de produits pour l'inventaire.</p>
+    </div>
+    <div>
+        <a href="{% url 'categorie_list' %}" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            <span>Retour</span>
+        </a>
+    </div>
+</div>
+
+<div class="card form-container">
+    <div class="card-header">
+        <span class="card-title">
+            <i data-lucide="edit-3"></i>
+            <span>Formulaire de catégorie</span>
+        </span>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; color: #ef4444; font-size: 0.875rem;">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-grid">
+                <!-- Nom -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.nom.id_for_label }}">Nom de la catégorie *</label>
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.nom.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.description.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'categorie_list' %}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="check"></i>
+                    <span>Enregistrer</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

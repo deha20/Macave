@@ -1,0 +1,159 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}Paramètres du Compte - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>Paramètres</h1>
+        <p>Gérez votre profil utilisateur et configurez l'affichage du tableau de bord.</p>
+    </div>
+</div>
+
+<div class="settings-container">
+    <!-- Navigation par onglets -->
+    <aside class="settings-nav">
+        <button class="settings-tab-btn {% if active_tab == 'profile' %}active{% endif %}" onclick="switchTab('profile')">
+            <i data-lucide="user"></i>
+            <span>Mon Profil</span>
+        </button>
+        <button class="settings-tab-btn {% if active_tab == 'preferences' %}active{% endif %}" onclick="switchTab('preferences')">
+            <i data-lucide="sliders"></i>
+            <span>Préférences</span>
+        </button>
+    </aside>
+
+    <!-- Contenu des onglets -->
+    <div class="settings-content">
+        <!-- Onglet 1 : Mon Profil -->
+        <div id="tab-profile" class="settings-pane {% if active_tab == 'profile' %}active{% endif %}">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <i data-lucide="user"></i>
+                        <span>Informations Personnelles</span>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_profile">
+                        
+                        <div class="form-grid">
+                            <!-- Nom d'utilisateur -->
+                            <div class="form-group col-span-2">
+                                <label class="form-label" for="{{ user_form.username.id_for_label }}">Nom d'utilisateur *</label>
+                                {{ user_form.username }}
+                                {% if user_form.username.errors %}
+                                    <span style="color: #ef4444; font-size: 0.75rem;">{{ user_form.username.errors.as_text }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Prénom -->
+                            <div class="form-group">
+                                <label class="form-label" for="{{ user_form.first_name.id_for_label }}">Prénom</label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
+                                    <span style="color: #ef4444; font-size: 0.75rem;">{{ user_form.first_name.errors.as_text }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Nom -->
+                            <div class="form-group">
+                                <label class="form-label" for="{{ user_form.last_name.id_for_label }}">Nom</label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                    <span style="color: #ef4444; font-size: 0.75rem;">{{ user_form.last_name.errors.as_text }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Adresse Email -->
+                            <div class="form-group col-span-2">
+                                <label class="form-label" for="{{ user_form.email.id_for_label }}">Adresse email</label>
+                                {{ user_form.email }}
+                                {% if user_form.email.errors %}
+                                    <span style="color: #ef4444; font-size: 0.75rem;">{{ user_form.email.errors.as_text }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-actions" style="margin-top: 0; padding-top: 20px;">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-lucide="check"></i>
+                                <span>Enregistrer le profil</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet 2 : Préférences -->
+        <div id="tab-preferences" class="settings-pane {% if active_tab == 'preferences' %}active{% endif %}">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <i data-lucide="sliders"></i>
+                        <span>Configuration du Tableau de bord</span>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_preferences">
+                        
+                        <div class="form-grid" style="grid-template-columns: 1fr; margin-bottom: 24px;">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ profile_form.theme.id_for_label }}">Thème par défaut</label>
+                                {{ profile_form.theme }}
+                                <span class="form-help">Sélectionnez le mode sombre ou clair qui s'affichera par défaut pour votre compte.</span>
+                                {% if profile_form.theme.errors %}
+                                    <span style="color: #ef4444; font-size: 0.75rem;">{{ profile_form.theme.errors.as_text }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-actions" style="margin-top: 0; padding-top: 20px;">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-lucide="check"></i>
+                                <span>Sauvegarder les préférences</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTab(tabId) {
+        // Enlever la classe active des boutons
+        document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Enlever la classe active des volets de contenu
+        document.querySelectorAll('.settings-pane').forEach(pane => {
+            pane.classList.remove('active');
+        });
+
+        // Trouver le bouton cliqué et l'activer
+        const clickedBtn = Array.from(document.querySelectorAll('.settings-tab-btn')).find(btn => 
+            btn.getAttribute('onclick').includes(tabId)
+        );
+        if (clickedBtn) clickedBtn.classList.add('active');
+
+        // Activer le volet correspondant
+        const targetPane = document.getElementById('tab-' + tabId);
+        if (targetPane) targetPane.classList.add('active');
+        
+        // Optionnel : Mettre à jour l'URL avec le paramètre tab
+        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?tab=' + tabId;
+        window.history.pushState({path:newUrl}, '', newUrl);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}{{ titre }} - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>{{ titre }}</h1>
+        <p>Saisissez les informations techniques et commerciales du produit.</p>
+    </div>
+    <div>
+        <a href="{% url 'produit_list' %}" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            <span>Retour</span>
+        </a>
+    </div>
+</div>
+
+<div class="card form-container">
+    <div class="card-header">
+        <span class="card-title">
+            <i data-lucide="edit-3"></i>
+            <span>Formulaire de produit</span>
+        </span>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; color: #ef4444; font-size: 0.875rem;">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-grid">
+                <!-- Nom -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.nom.id_for_label }}">Nom du produit *</label>
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.nom.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Categorie -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.categorie.id_for_label }}">Catégorie *</label>
+                    {{ form.categorie }}
+                    {% if form.categorie.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.categorie.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Fournisseur -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.fournisseur.id_for_label }}">Fournisseur *</label>
+                    {{ form.fournisseur }}
+                    {% if form.fournisseur.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.fournisseur.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Prix Achat -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.prix_achat.id_for_label }}">Prix d'achat (FCFA) *</label>
+                    {{ form.prix_achat }}
+                    {% if form.prix_achat.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.prix_achat.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Prix Vente -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.prix_vente.id_for_label }}">Prix de vente (FCFA) *</label>
+                    {{ form.prix_vente }}
+                    {% if form.prix_vente.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.prix_vente.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Stock Actuel -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.stock_actuel.id_for_label }}">Stock initial *</label>
+                    {{ form.stock_actuel }}
+                    {% if form.stock_actuel.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.stock_actuel.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Seuil d'alerte -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.seuil_alerte.id_for_label }}">Seuil d'alerte *</label>
+                    {{ form.seuil_alerte }}
+                    {% if form.seuil_alerte.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.seuil_alerte.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Image -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.image.id_for_label }}">Photo de la bouteille</label>
+                    {{ form.image }}
+                    <span class="form-help">Optionnel. Fichiers image acceptés (.jpg, .png, etc.)</span>
+                    {% if form.image.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.image.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="form-group col-span-2">
+                    <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.description.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Actif -->
+                <div class="form-group col-span-2">
+                    <div class="form-check">
+                        {{ form.actif }}
+                        <label class="form-label" for="{{ form.actif.id_for_label }}" style="margin: 0; cursor: pointer;">Produit actif (visible dans les inventaires)</label>
+                    </div>
+                    {% if form.actif.errors %}
+                        <span style="color: #ef4444; font-size: 0.75rem;">{{ form.actif.errors.as_text }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'produit_list' %}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="check"></i>
+                    <span>Enregistrer</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

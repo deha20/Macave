@@ -1,0 +1,354 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}Tableau de bord - MaCave{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="welcome-section">
+    <div class="welcome-title">
+        <h1>Bonjour, {{ request.user.username|capfirst }} 👋</h1>
+        <p>Voici un aperçu de l'activité de votre cave.</p>
+    </div>
+    <div>
+        <button class="btn btn-secondary" onclick="window.print()" title="Imprimer ou exporter la page">
+            <i data-lucide="download"></i>
+            <span>Exporter le rapport</span>
+        </button>
+    </div>
+</div>
+
+<!-- KPI Cards Section -->
+<div class="kpi-grid">
+    <!-- Card 1: Produits -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon-wrapper indigo">
+                <i data-lucide="box"></i>
+            </div>
+        </div>
+        <div class="kpi-info">
+            <span class="kpi-label">Produits</span>
+            <span class="kpi-value">{{ total_produits }}</span>
+        </div>
+        <a href="{% url 'produit_list' %}" class="kpi-link">
+            <span>Voir tous</span>
+            <i data-lucide="arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Card 2: Catégories -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon-wrapper green">
+                <i data-lucide="tag"></i>
+            </div>
+        </div>
+        <div class="kpi-info">
+            <span class="kpi-label">Catégories</span>
+            <span class="kpi-value">{{ total_categories }}</span>
+        </div>
+        <a href="{% url 'categorie_list' %}" class="kpi-link">
+            <span>Voir tous</span>
+            <i data-lucide="arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Card 3: Fournisseurs -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon-wrapper blue">
+                <i data-lucide="users"></i>
+            </div>
+        </div>
+        <div class="kpi-info">
+            <span class="kpi-label">Fournisseurs</span>
+            <span class="kpi-value">{{ total_fournisseurs }}</span>
+        </div>
+        <a href="{% url 'fournisseur_list' %}" class="kpi-link">
+            <span>Voir tous</span>
+            <i data-lucide="arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Card 4: Stock Faible -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon-wrapper orange">
+                <i data-lucide="alert-triangle"></i>
+            </div>
+        </div>
+        <div class="kpi-info">
+            <span class="kpi-label">Stock faible</span>
+            <span class="kpi-value">{{ stock_faible_count }}</span>
+        </div>
+        <a href="{% url 'produit_list' %}?stock_faible=1" class="kpi-link">
+            <span>Voir détails</span>
+            <i data-lucide="arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Card 5: Rupture de stock -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon-wrapper red">
+                <i data-lucide="x-circle"></i>
+            </div>
+        </div>
+        <div class="kpi-info">
+            <span class="kpi-label">Rupture de stock</span>
+            <span class="kpi-value">{{ rupture_count }}</span>
+        </div>
+        <a href="{% url 'produit_list' %}?rupture=1" class="kpi-link">
+            <span>Voir détails</span>
+            <i data-lucide="arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Card 6: Mouvements 30j -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon-wrapper teal">
+                <i data-lucide="arrow-left-right"></i>
+            </div>
+        </div>
+        <div class="kpi-info">
+            <span class="kpi-label">Mouvements (30j)</span>
+            <span class="kpi-value">{{ mouvements_30j }}</span>
+        </div>
+        <a href="{% url 'mouvement_list' %}" class="kpi-link">
+            <span>Voir tous</span>
+            <i data-lucide="arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Two Column Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- Left Column: Tables -->
+    <div class="dashboard-left-col">
+        <!-- Card: État du stock -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i data-lucide="trending-up"></i>
+                    <span>État du stock</span>
+                </span>
+                <a href="{% url 'produit_list' %}" class="card-action-link">Voir tous</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Catégorie</th>
+                                <th>Stock actuel</th>
+                                <th>Seuil d'alerte</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produit in produits_stock %}
+                            <tr>
+                                <td>
+                                    <div class="product-cell">
+                                        {% if produit.image %}
+                                            <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="product-img">
+                                        {% else %}
+                                            <div class="product-img" style="display: flex; align-items: center; justify-content: center; background-color: var(--primary-light); color: var(--primary);">
+                                                <i data-lucide="wine" style="width: 18px; height: 18px;"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="product-info-text">
+                                            <a href="{% url 'produit_detail' produit.pk %}" class="product-name">{{ produit.nom }}</a>
+                                            <span class="product-ref">{{ produit.reference }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ produit.categorie.nom }}</td>
+                                <td><strong>{{ produit.stock_actuel }}</strong></td>
+                                <td>{{ produit.seuil_alerte }}</td>
+                                <td>
+                                    {% if produit.en_rupture %}
+                                        <span class="badge danger">Rupture</span>
+                                    {% elif produit.stock_faible %}
+                                        <span class="badge warning">Faible</span>
+                                    {% else %}
+                                        <span class="badge normal">Normal</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                    Aucun produit disponible.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Derniers mouvements -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i data-lucide="history"></i>
+                    <span>Derniers mouvements</span>
+                </span>
+                <a href="{% url 'mouvement_list' %}" class="card-action-link">Voir tous</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Produit</th>
+                                <th>Type</th>
+                                <th>Quantité</th>
+                                <th>Utilisateur</th>
+                                <th>Motif</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mouvement in derniers_mouvements %}
+                            <tr>
+                                <td>{{ mouvement.date_mouvement|date:"d/m/Y H:i" }}</td>
+                                <td><strong>{{ mouvement.produit.nom }}</strong></td>
+                                <td>
+                                    {% if mouvement.type_mouvement == 'ENTREE' %}
+                                        <span class="badge normal">Entrée</span>
+                                    {% elif mouvement.type_mouvement == 'SORTIE' %}
+                                        <span class="badge danger">Sortie</span>
+                                    {% else %}
+                                        <span class="badge info">Ajustement</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>
+                                        {% if mouvement.type_mouvement == 'ENTREE' %}+{% elif mouvement.type_mouvement == 'SORTIE' %}-{% endif %}{{ mouvement.quantite }}
+                                    </strong>
+                                </td>
+                                <td>{{ mouvement.utilisateur.username }}</td>
+                                <td><span style="font-size: 0.825rem; color: var(--text-muted);">{{ mouvement.motif|default:"-" }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                    Aucun mouvement enregistré.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Quick Actions & Alerts -->
+    <div class="dashboard-right-col">
+        <!-- Card: Actions rapides -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <span class="card-title">
+                    <i data-lucide="zap"></i>
+                    <span>Actions rapides</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions-grid">
+                    <a href="{% url 'produit_create' %}" class="quick-action-btn btn-produit">
+                        <div class="icon-box">
+                            <i data-lucide="plus"></i>
+                        </div>
+                        <span class="btn-text">Ajouter un produit</span>
+                    </a>
+                    
+                    <a href="{% url 'fournisseur_create' %}" class="quick-action-btn btn-fournisseur">
+                        <div class="icon-box">
+                            <i data-lucide="user-plus"></i>
+                        </div>
+                        <span class="btn-text">Nouvel fournisseur</span>
+                    </a>
+
+                    <a href="{% url 'categorie_create' %}" class="quick-action-btn btn-categorie">
+                        <div class="icon-box">
+                            <i data-lucide="tag"></i>
+                        </div>
+                        <span class="btn-text">Nouvelle catégorie</span>
+                    </a>
+
+                    <a href="{% url 'stock_entree' %}" class="quick-action-btn btn-entree">
+                        <div class="icon-box">
+                            <i data-lucide="arrow-down-left"></i>
+                        </div>
+                        <span class="btn-text">Entrée de stock</span>
+                    </a>
+
+                    <a href="{% url 'stock_sortie' %}" class="quick-action-btn btn-sortie">
+                        <div class="icon-box">
+                            <i data-lucide="arrow-up-right"></i>
+                        </div>
+                        <span class="btn-text">Sortie de stock</span>
+                    </a>
+
+                    <a href="{% url 'stock_ajustement' %}" class="quick-action-btn btn-ajustement">
+                        <div class="icon-box">
+                            <i data-lucide="sliders"></i>
+                        </div>
+                        <span class="btn-text">Ajustement stock</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Produits en alerte -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i data-lucide="alert-octagon" style="color: #ef4444;"></i>
+                    <span>Produits en alerte</span>
+                </span>
+                <a href="{% url 'produit_list' %}?alerte=1" class="card-action-link">Voir tous</a>
+            </div>
+            <div class="card-body">
+                <div class="alerted-products-list">
+                    {% for produit in produits_alerte %}
+                    <div class="alerted-product-item">
+                        <div class="alerted-product-left">
+                            {% if produit.image %}
+                                <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="alerted-product-img">
+                            {% else %}
+                                <div class="alerted-product-img" style="display: flex; align-items: center; justify-content: center; background-color: var(--primary-light); color: var(--primary);">
+                                    <i data-lucide="wine" style="width: 16px; height: 16px;"></i>
+                                </div>
+                            {% endif %}
+                            <div class="alerted-product-details">
+                                <a href="{% url 'produit_detail' produit.pk %}" class="alerted-product-name">{{ produit.nom }}</a>
+                                <span class="alerted-product-stock">Stock actuel: {{ produit.stock_actuel }} (Seuil: {{ produit.seuil_alerte }})</span>
+                            </div>
+                        </div>
+                        <div>
+                            {% if produit.en_rupture %}
+                                <span class="badge danger">Rupture</span>
+                            {% else %}
+                                <span class="badge warning">Faible</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 12px; color: var(--text-muted); font-size: 0.85rem;">
+                        Aucun produit en alerte.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

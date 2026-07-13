@@ -1,0 +1,108 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}Historique des Mouvements - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>Mouvements de Stock</h1>
+        <p>Historique complet des entrées, sorties et ajustements de stock.</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <a href="{% url 'stock_entree' %}" class="btn btn-secondary" style="color: var(--status-normal-text); border-color: var(--status-normal-text);">
+            <i data-lucide="arrow-down-left"></i>
+            <span>Enregistrer Entrée</span>
+        </a>
+        <a href="{% url 'stock_sortie' %}" class="btn btn-secondary" style="color: var(--status-danger-text); border-color: var(--status-danger-text);">
+            <i data-lucide="arrow-up-right"></i>
+            <span>Enregistrer Sortie</span>
+        </a>
+        <a href="{% url 'stock_ajustement' %}" class="btn btn-secondary" style="color: var(--status-info-text); border-color: var(--status-info-text);">
+            <i data-lucide="sliders"></i>
+            <span>Ajustement</span>
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <i data-lucide="history"></i>
+            <span>Journal d'activité ({{ mouvements|length }} opérations)</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th>Date de l'opération</th>
+                        <th>Produit</th>
+                        <th>Type de Mouvement</th>
+                        <th style="text-align: center;">Quantité</th>
+                        <th>Opérateur (Utilisateur)</th>
+                        <th>Motif / Justification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mv in mouvements %}
+                    <tr>
+                        <td>{{ mv.date_mouvement|date:"d/m/Y à H:i:s" }}</td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--text-main);">
+                                <a href="{% url 'produit_detail' mv.produit.pk %}" style="text-decoration: underline; color: inherit;">
+                                    {{ mv.produit.nom }}
+                                </a>
+                                {% if mv.produit.est_supprime %}
+                                    <span class="badge danger" style="padding: 2px 6px; font-size: 0.65rem; margin-left: 6px; vertical-align: middle;">Archivé</span>
+                                {% endif %}
+                                <span style="font-size: 0.725rem; color: var(--text-muted); font-family: monospace; display: block;">
+                                    {{ mv.produit.reference }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if mv.type_mouvement == 'ENTREE' %}
+                                <span class="badge normal">Entrée de stock</span>
+                            {% elif mv.type_mouvement == 'SORTIE' %}
+                                <span class="badge danger">Sortie de stock</span>
+                            {% else %}
+                                <span class="badge info">Ajustement de stock</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            <strong style="font-size: 0.95rem;">
+                                {% if mv.type_mouvement == 'ENTREE' %}
+                                    <span style="color: var(--status-normal-text);">+{{ mv.quantite }}</span>
+                                {% elif mv.type_mouvement == 'SORTIE' %}
+                                    <span style="color: var(--status-danger-text);">-{{ mv.quantite }}</span>
+                                {% else %}
+                                    {% if mv.quantite >= 0 %}
+                                        <span style="color: var(--status-info-text);">+{{ mv.quantite }}</span>
+                                    {% else %}
+                                        <span style="color: var(--status-danger-text);">{{ mv.quantite }}</span>
+                                    {% endif %}
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td>{{ mv.utilisateur.username }}</td>
+                        <td>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">
+                                {{ mv.motif|default:"Aucun motif renseigné." }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                            Aucune opération de stock enregistrée. Utilisez les boutons ci-dessus pour ajouter des entrées/sorties.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

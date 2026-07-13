@@ -1,0 +1,91 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block titre %}Fournisseurs - MaCave{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-title">
+        <h1>Fournisseurs</h1>
+        <p>Gérez vos partenaires commerciaux et fournisseurs de boissons.</p>
+    </div>
+    <div>
+        <a href="{% url 'fournisseur_create' %}" class="btn btn-primary">
+            <i data-lucide="user-plus"></i>
+            <span>Nouveau fournisseur</span>
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <i data-lucide="users"></i>
+            <span>Tous les fournisseurs ({{ fournisseurs|length }})</span>
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th>Nom du fournisseur</th>
+                        <th>Contact Principal</th>
+                        <th>Téléphone</th>
+                        <th>Email</th>
+                        <th>Adresse</th>
+                        <th style="text-align: center;">Produits livrés</th>
+                        <th>Statut</th>
+                        <th style="text-align: right; padding-right: 24px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fn in fournisseurs %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--text-main);">{{ fn.nom }}</div>
+                        </td>
+                        <td>{{ fn.contact|default:"-" }}</td>
+                        <td><strong>{{ fn.telephone|default:"-" }}</strong></td>
+                        <td>
+                            {% if fn.email %}
+                                <a href="mailto:{{ fn.email }}" style="color: var(--primary); text-decoration: underline;">{{ fn.email }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td><span style="font-size: 0.825rem; color: var(--text-muted);">{{ fn.adresse|default:"-"|truncatechars:40 }}</span></td>
+                        <td style="text-align: center;">
+                            <span class="badge info">{{ fn.nb_produits }} produit{{ fn.nb_produits|pluralize }}</span>
+                        </td>
+                        <td>
+                            {% if fn.actif %}
+                                <span class="badge normal">Actif</span>
+                            {% else %}
+                                <span class="badge danger">Inactif</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right; padding-right: 24px;">
+                            <div style="display: inline-flex; gap: 8px;">
+                                <a href="{% url 'fournisseur_update' fn.pk %}" class="btn btn-secondary btn-sm" style="color: var(--primary);" title="Modifier">
+                                    <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                                </a>
+                                <a href="{% url 'fournisseur_delete' fn.pk %}" class="btn btn-secondary btn-sm" style="color: #ef4444;" title="Supprimer">
+                                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                            Aucun fournisseur disponible. Cliquez sur "Nouveau fournisseur" pour en ajouter un.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
