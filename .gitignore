@@ -11,6 +11,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media/
+staticfiles/
 
 # Virtual environments
 venv/
@@ -30,3 +31,6 @@ venv.bak/
 *.sln
 *.sw?
 .DS_Store
+
+# Other projects in this repo
+django-firebase-auth/
